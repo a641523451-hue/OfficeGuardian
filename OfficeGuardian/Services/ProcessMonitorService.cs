@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Microsoft.Extensions.Configuration;
 using OfficeGuardian.Data;
 using OfficeGuardian.Models;
 
@@ -10,21 +11,23 @@ public class ProcessMonitorService
     private readonly CpuUsageCalculator _cpuCalc;
     private readonly LeakDetector _leakDetector;
     private readonly AlertService _alertService;
+    private readonly string[] _targetProcesses;
     private Timer? _timer;
-    private static readonly string[] TargetProcesses = 
-        { "wps", "et", "wpp", "wpspdf", "wpscloudsvr", "wpscenter" };
     private static readonly TimeSpan ScanInterval = TimeSpan.FromSeconds(60);
 
     public event Action<List<ProcessLog>>? OnScanCompleted;
     public event Action<List<LeakWarning>>? OnWarningsDetected;
 
     public ProcessMonitorService(DatabaseContext db, CpuUsageCalculator cpuCalc, 
-        LeakDetector leakDetector, AlertService alertService)
+        LeakDetector leakDetector, AlertService alertService,
+        IConfiguration configuration)
     {
         _db = db;
         _cpuCalc = cpuCalc;
         _leakDetector = leakDetector;
         _alertService = alertService;
+        _targetProcesses = configuration.GetSection("WatchProcesses").Get<string[]>()
+            ?? Array.Empty<string>();
     }
 
     public void Start()
@@ -42,7 +45,7 @@ public class ProcessMonitorService
         var logs = new List<ProcessLog>();
         var now = DateTime.Now;
 
-        foreach (var procName in TargetProcesses)
+        foreach (var procName in _targetProcesses)
         {
             try
             {
@@ -68,7 +71,6 @@ public class ProcessMonitorService
                             UserObjects = 0
                         };
 
-                        // Try to get GDI/USER objects (may fail without sufficient permissions)
                         try { log.GdiObjects = GetGdiObjects(proc.Handle); } catch { }
                         try { log.UserObjects = GetUserObjects(proc.Handle); } catch { }
 
@@ -81,14 +83,13 @@ public class ProcessMonitorService
                     }
                 }
             }
-            catch { /* process may exit between enumeration and access */ }
+            catch { }
         }
 
         if (logs.Count > 0)
         {
             OnScanCompleted?.Invoke(logs);
 
-            // Run leak detection
             var warnings = _leakDetector.Analyze(logs);
             foreach (var w in warnings)
             {
@@ -105,13 +106,6 @@ public class ProcessMonitorService
         await Task.CompletedTask;
     }
 
-    private static int GetGdiObjects(IntPtr hProcess)
-    {
-        return 0; // Would need P/Invoke to GetGuiResources - simplified
-    }
-
-    private static int GetUserObjects(IntPtr hProcess)
-    {
-        return 0; // Would need P/Invoke to GetGuiResources - simplified
-    }
+    private static int GetGdiObjects(IntPtr hProcess) => 0;
+    private static int GetUserObjects(IntPtr hProcess) => 0;
 }

@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OfficeGuardian.Data;
 using OfficeGuardian.Services;
@@ -16,11 +18,20 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
-        var dbPath = System.IO.Path.Combine(
+        // Load configuration
+        var config = new ConfigurationBuilder()
+            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .Build();
+
+        var dbPath = Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "Data", "officeguardian.db");
-        System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(dbPath)!);
+        Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
 
         var services = new ServiceCollection();
+
+        // Configuration
+        services.AddSingleton<IConfiguration>(config);
 
         // Data
         services.AddSingleton(sp => new DatabaseContext(dbPath));
