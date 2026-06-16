@@ -1,0 +1,19 @@
+﻿# Auto detect text files and perform LF normalization
+* text=auto
+
+# C# project files
+*.cs     text diff=csharp
+*.csproj text
+*.sln    text
+
+# JSON files
+*.json   text
+
+# Images and binaries
+*.png    binary
+*.jpg    binary
+*.ico    binary
+
+# Windows-specific
+*.bat    text eol=crlf
+*.ps1    text eol=crlf
