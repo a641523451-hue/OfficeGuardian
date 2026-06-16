@@ -1,0 +1,36 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.DotSettings
+*.csproj.user
+
+# VS Code
+.vscode/
+
+# Rider
+.idea/
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+[Pp]ublish/
+packages/
+*.nupkg
+
+# OfficeGuardian specific
+OfficeGuardian/Reports/
+OfficeGuardian/Data/officeguardian.db
+OfficeGuardian/publish/
+OfficeGuardian-v1.0.zip
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Logs
+*.log
+
+# Visual Studio.vs/
