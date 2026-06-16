@@ -1,4 +1,4 @@
-# .NET
+﻿# .NET
 bin/
 obj/
 *.user
@@ -19,11 +19,8 @@ obj/
 packages/
 *.nupkg
 
-# OfficeGuardian specific
-OfficeGuardian/Reports/
-OfficeGuardian/Data/officeguardian.db
-OfficeGuardian/publish/
-OfficeGuardian-v1.0.zip
+# Database (local copy)
+src/Data/officeguardian.db
 
 # OS
 Thumbs.db
@@ -33,4 +30,5 @@ desktop.ini
 # Logs
 *.log
 
-# Visual Studio.vs/
+# Visual Studio
+.vs/
